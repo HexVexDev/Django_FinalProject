@@ -13,6 +13,7 @@ class QuestionInLine(admin.StackedInline):
 
 class ChoiceAdmin(admin.ModelAdmin):
     list_display = ['ctext']
+    
 
 class QuestionAdmin(admin.ModelAdmin):
     inlines = [ChoiceInLine]

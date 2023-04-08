@@ -74,7 +74,8 @@ class Lesson(models.Model):
     order = models.IntegerField(default=0)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     content = models.TextField()
-
+    def __str__(self):
+        return self.title 
 
 # Enrollment model
 # <HINT> Once a user enrolled a class, an enrollment entry should be created between the user and course
@@ -122,8 +123,8 @@ class Question(models.Model):
         else:
             return False
     def __str__(self):
-        return self.qtext + "," + \
-               self.lesson.title
+        return self.qtext 
+               
 
 #  <HINT> Create a Choice Model with:
     # Used to persist choice content for a question
@@ -135,7 +136,7 @@ class Choice(models.Model):
  question_id = models.ForeignKey(Question, on_delete=models.CASCADE, default=0)
  ctext = models.CharField(null=False, max_length=50)
  iscorrect = models.BooleanField(default=False)
-
+ 
 # <HINT> The submission model
 # One enrollment could have multiple submission
 # One submission could have multiple choices

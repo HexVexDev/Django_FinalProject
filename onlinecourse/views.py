@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 # <HINT> Import any new Models here
-from .models import Course, Enrollment
+from .models import Course, Enrollment, Lesson, Question, Choice, Submission
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
@@ -110,8 +110,20 @@ def enroll(request, course_id):
          # Collect the selected choices from exam form
          # Add each selected choice object to the submission object
          # Redirect to show_exam_result with the submission id
-#def submit(request, course_id):
-
+def submit(request, course_id):
+    course = get_object_or_404(Course,pk=course_id)
+    user = request.user
+    enrollment = Enrollment.objects.get(user=user,course=course)
+    submitted_answers = []
+    for key in request.POST:
+        if key.startswith('choice'):
+            value = request.POST[key]
+            choice_id = int(value)
+            submitted_answers.append(choice_id)
+    return submitted_answers
+    submission = Submission.objects.create(enrollment=enrollment,choices=submitted_answers)
+    submission.save()
+    return redirect('show_exam_result', submission_id =submission.id)
 
 # <HINT> A example method to collect the selected choices from the exam form from the request object
 #def extract_answers(request):
@@ -130,7 +142,27 @@ def enroll(request, course_id):
         # Get the selected choice ids from the submission record
         # For each selected choice, check if it is a correct answer or not
         # Calculate the total score
-#def show_exam_result(request, course_id, submission_id):
+def show_exam_result(request, course_id, submission_id):
+    context = {}
+    course = get_object_or_404(Course,pk=course_id)
+    submission = get_object_or_404(Submission,pk=submission_id)
+    submitted_choices = submission.choices
+    choice_set = Choices.objects.filter(id__in=submitted_choices)
+    score = 0
+    for x in choice_set:
+        if x.iscorrect == True:
+            qid = choice_set.qid
+            questiono = Question.objects.get(pk=qid)
+            score += questiono.qvalue
+            context['corrcho'].append(x.id) 
+    context['score'] = score
+    context['course'] = course
+    return render(request, 'onlinecourse/exam_result.html', context)
+    
+        
+
+    
+        
 
 
 
