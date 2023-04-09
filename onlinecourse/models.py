@@ -122,8 +122,9 @@ class Question(models.Model):
             return True
         else:
             return False
+     
     def __str__(self):
-        return self.qtext 
+      return str(self.id)
                
 
 #  <HINT> Create a Choice Model with:
@@ -133,9 +134,10 @@ class Question(models.Model):
     # Indicate if this choice of the question is a correct one or not
     # Other fields and methods you would like to design
 class Choice(models.Model):
- question_id = models.ForeignKey(Question, on_delete=models.CASCADE, default=0)
+ questionid = models.ForeignKey(Question, on_delete=models.CASCADE, default=0)
  ctext = models.CharField(null=False, max_length=50)
  iscorrect = models.BooleanField(default=False)
+ 
  
 # <HINT> The submission model
 # One enrollment could have multiple submission

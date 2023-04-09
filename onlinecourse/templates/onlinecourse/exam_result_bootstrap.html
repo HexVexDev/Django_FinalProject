@@ -36,19 +36,43 @@
 </nav>
 
 <div class="container-fluid">
-    {% if grade > 80 %}
+    {% if score > 80 %}
     <div class="alert alert-success">
-       <!--HINT Display passed info -->
+       <p>The tribe has spoken. You've passed the exam with score {{score}}</p>
     </div>
-        {% else %}
+    {% else %}
         <div class="alert alert-danger">
-            <!--HINT Display failed info -->
+            <p>The tribe has spoken. You've failed the exam with score {{score}} </p>
         </div>
         <a class="btn btn-link text-danger" href="{% url 'onlinecourse:course_details' course.id %}">Re-test</a>
-        {% endif %}
-        <div class="card-columns-vertical mt-1">
-        <h5 class="">Exam results</h5>
+    {% endif %}
+        <div class="card-columns-vertical">
+        <h5>Exam results</h5>
             <!--HINT Display exam results-->
+            {%for question in lesson.question_set.all%}
+            <div class="card">
+                <div class="card-header"><h5>{{question.qtext}}</h5></div>
+            {% csrf_token %}
+                    <div class="card-body">
+                        <ul>
+                {%for choice in question.choice_set.all%}
+                    {%if choice.id in corrcho%}
+                            <div class="alert alert-success">
+                                <li>Correct: {{choice.ctext}}</li>
+                            </div>
+                    {%elif choice.id in selnotcorr%}
+                            <div class="alert alert-danger">
+                                <li>Incorrect: {{choice.ctext}}</li>
+                            </div>
+                    {%else%}
+                            <div class="alert alert-warning">
+                                <li>Not selected: {{choice.ctext}}</li>
+                            </div>
+                    {% endif %}
+                {% endfor %}
+                        </ul>
+                    </div>
+            {% endfor %}
         </div>
     </div>
 </body>

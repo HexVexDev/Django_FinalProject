@@ -111,20 +111,20 @@ def enroll(request, course_id):
          # Add each selected choice object to the submission object
          # Redirect to show_exam_result with the submission id
 def submit(request, course_id):
-    course = get_object_or_404(Course,pk=course_id)
-    user = request.user
-    enrollment = Enrollment.objects.get(user=user,course=course)
-    submitted_answers = []
-    for key in request.POST:
-        if key.startswith('choice'):
-            value = request.POST[key]
-            choice_id = int(value)
-            submitted_answers.append(choice_id)
-    return submitted_answers
-    submission = Submission.objects.create(enrollment=enrollment,choices=submitted_answers)
-    submission.save()
-    return redirect('show_exam_result', submission_id =submission.id)
-
+    if request.method == "POST":
+        course = get_object_or_404(Course,pk=course_id)
+        user = request.user
+        enrollment = Enrollment.objects.get(user=user,course=course)
+        submitted_answers = []
+        for key in request.POST:
+            if key.startswith('choice'):
+                value = request.POST[key]
+                choice_id = int(value)
+                submitted_answers.append(choice_id)
+        submission = Submission.objects.create(enrollment=enrollment)
+        for choice in submitted_answers:
+            submission.choices.add(choice)
+        return redirect('onlinecourse:show_exam_result', course.id, submission.id)
 # <HINT> A example method to collect the selected choices from the exam form from the request object
 #def extract_answers(request):
 #    submitted_anwsers = []
@@ -145,19 +145,27 @@ def submit(request, course_id):
 def show_exam_result(request, course_id, submission_id):
     context = {}
     course = get_object_or_404(Course,pk=course_id)
+    lesson = Lesson.objects.get(pk=course.id)
     submission = get_object_or_404(Submission,pk=submission_id)
-    submitted_choices = submission.choices
-    choice_set = Choices.objects.filter(id__in=submitted_choices)
+    submitted_choices = submission.choices.all()
+    
     score = 0
-    for x in choice_set:
-        if x.iscorrect == True:
-            qid = choice_set.qid
+    context['corrcho'] = []
+    context['selnotcorr'] = []
+    for x in submitted_choices:
+        choice = Choice.objects.get(pk=x.id)
+        if choice.iscorrect == True:
+            context['corrcho'].append(choice.id)
+            qid = choice.questionid_id
             questiono = Question.objects.get(pk=qid)
             score += questiono.qvalue
-            context['corrcho'].append(x.id) 
+        else: 
+            context['selnotcorr'].append(choice.id)
+
     context['score'] = score
+    context['lesson'] = lesson
     context['course'] = course
-    return render(request, 'onlinecourse/exam_result.html', context)
+    return render(request, 'onlinecourse/exam_result_bootstrap.html', context)
     
         
 
